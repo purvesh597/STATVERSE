@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useXP } from "@/context/XPContext";
 import { ACHIEVEMENTS } from "@/context/XPContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const datasets = [
   {
@@ -12,12 +13,12 @@ const datasets = [
     icon: "🎬",
     description: "Analyze viewer patterns across genres",
     data: [
-      { label: "Action", value: 340, color: "#00d4ff" },
-      { label: "Drama", value: 280, color: "#a855f7" },
-      { label: "Comedy", value: 220, color: "#ec4899" },
-      { label: "Sci-Fi", value: 190, color: "#22d3ee" },
-      { label: "Horror", value: 120, color: "#f97316" },
-      { label: "Romance", value: 160, color: "#f43f5e" },
+      { label: "Action", value: 340 },
+      { label: "Drama", value: 280 },
+      { label: "Comedy", value: 220 },
+      { label: "Sci-Fi", value: 190 },
+      { label: "Horror", value: 120 },
+      { label: "Romance", value: 160 },
     ],
     insight: "Action dominates with 340 hours — that's 26% of total watch time!",
     quiz: {
@@ -32,12 +33,12 @@ const datasets = [
     icon: "🏏",
     description: "Player stats across T20 matches",
     data: [
-      { label: "Kohli", value: 89, color: "#00d4ff" },
-      { label: "Rohit", value: 76, color: "#a855f7" },
-      { label: "Dhoni", value: 62, color: "#ec4899" },
-      { label: "Hardik", value: 55, color: "#22d3ee" },
-      { label: "Bumrah", value: 45, color: "#f97316" },
-      { label: "Jadeja", value: 51, color: "#f43f5e" },
+      { label: "Kohli", value: 89 },
+      { label: "Rohit", value: 76 },
+      { label: "Dhoni", value: 62 },
+      { label: "Hardik", value: 55 },
+      { label: "Bumrah", value: 45 },
+      { label: "Jadeja", value: 51 },
     ],
     insight: "Kohli leads with an avg of 89 — 17% higher than the next best!",
     quiz: {
@@ -52,12 +53,12 @@ const datasets = [
     icon: "📚",
     description: "Performance across subjects",
     data: [
-      { label: "Math", value: 78, color: "#00d4ff" },
-      { label: "Science", value: 82, color: "#a855f7" },
-      { label: "English", value: 91, color: "#ec4899" },
-      { label: "History", value: 65, color: "#22d3ee" },
-      { label: "CS", value: 95, color: "#f97316" },
-      { label: "Art", value: 73, color: "#f43f5e" },
+      { label: "Math", value: 78 },
+      { label: "Science", value: 82 },
+      { label: "English", value: 91 },
+      { label: "History", value: 65 },
+      { label: "CS", value: 95 },
+      { label: "Art", value: 73 },
     ],
     insight: "CS tops at 95 marks — History needs 46% more effort to catch up!",
     quiz: {
@@ -68,6 +69,9 @@ const datasets = [
   },
 ];
 
+const DARK_COLORS = ["#00d4ff", "#a855f7", "#ec4899", "#22d3ee", "#f97316", "#f43f5e"];
+const LIGHT_COLORS = ["#111111", "#333333", "#555555", "#777777", "#999999", "#bbbbbb"];
+
 export default function DataDetectiveLab() {
   const [activeDataset, setActiveDataset] = useState(0);
   const [analyzed, setAnalyzed] = useState<boolean[]>([false, false, false]);
@@ -75,6 +79,9 @@ export default function DataDetectiveLab() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showInsight, setShowInsight] = useState(false);
   const { addXP, completeModule, unlockAchievement } = useXP();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const colors = isDark ? DARK_COLORS : LIGHT_COLORS;
 
   const current = datasets[activeDataset];
   const maxVal = Math.max(...current.data.map((d) => d.value));
@@ -138,15 +145,16 @@ export default function DataDetectiveLab() {
                 setShowInsight(false);
                 setSelectedAnswer(null);
               }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                activeDataset === i
-                  ? "bg-white/[0.08] border border-white/[0.12] text-white"
-                  : "bg-white/[0.02] border border-white/[0.06] text-white/40 hover:text-white/60"
-              }`}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200"
+              style={{
+                background: activeDataset === i ? "var(--card-bg-hover)" : "var(--card-bg)",
+                border: `1px solid ${activeDataset === i ? "var(--card-border-hover)" : "var(--card-border)"}`,
+                color: activeDataset === i ? "var(--text-primary)" : "var(--text-muted)",
+              }}
             >
               <span>{ds.icon}</span>
               <span>{ds.title}</span>
-              {analyzed[i] && <span className="text-[10px] text-green-400">✓</span>}
+              {analyzed[i] && <span className="text-[10px]" style={{ color: "var(--success-text)" }}>✓</span>}
             </button>
           ))}
         </div>
@@ -159,8 +167,12 @@ export default function DataDetectiveLab() {
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-semibold text-white/90">{current.title}</h3>
-                <p className="text-xs text-white/30 mt-1">{current.description}</p>
+                <h3 className="text-lg font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  {current.title}
+                </h3>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  {current.description}
+                </p>
               </div>
               <button onClick={handleAnalyze} className="btn-primary text-xs !px-4 !py-2">
                 {analyzed[activeDataset] ? "Re-analyze" : "Analyze"} ⚡
@@ -178,21 +190,21 @@ export default function DataDetectiveLab() {
                     transition={{ delay: i * 0.08, duration: 0.4 }}
                     className="flex items-center gap-3"
                   >
-                    <span className="text-xs text-white/40 w-16 text-right font-mono">
+                    <span className="text-xs w-16 text-right font-mono" style={{ color: "var(--text-muted)" }}>
                       {item.label}
                     </span>
-                    <div className="flex-1 h-7 bg-white/[0.03] rounded-lg overflow-hidden relative">
+                    <div className="flex-1 h-7 rounded-lg overflow-hidden relative" style={{ background: "var(--progress-bg)" }}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${(item.value / maxVal) * 100}%` }}
                         transition={{ delay: i * 0.1 + 0.2, duration: 0.8, ease: "easeOut" }}
                         className="h-full rounded-lg relative"
                         style={{
-                          background: `linear-gradient(90deg, ${item.color}20, ${item.color}40)`,
-                          borderRight: `2px solid ${item.color}`,
+                          background: `linear-gradient(90deg, ${colors[i]}20, ${colors[i]}40)`,
+                          borderRight: `2px solid ${colors[i]}`,
                         }}
                       />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-white/40">
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
                         {item.value}
                       </span>
                     </div>
@@ -208,11 +220,17 @@ export default function DataDetectiveLab() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mt-6 p-4 rounded-xl bg-[#00d4ff]/[0.05] border border-[#00d4ff]/[0.15]"
+                  className="mt-6 p-4 rounded-xl"
+                  style={{
+                    background: "var(--insight-bg)",
+                    border: "1px solid var(--insight-border)",
+                  }}
                 >
                   <div className="flex items-start gap-2">
                     <span className="text-sm">💡</span>
-                    <p className="text-sm text-[#00d4ff]/80">{current.insight}</p>
+                    <p className="text-sm" style={{ color: "var(--insight-text)" }}>
+                      {current.insight}
+                    </p>
                   </div>
                 </motion.div>
               )}
@@ -229,11 +247,15 @@ export default function DataDetectiveLab() {
           >
             <div className="flex items-center gap-2 mb-6">
               <span className="text-lg">🧠</span>
-              <h3 className="text-lg font-semibold text-white/90">Quick Challenge</h3>
+              <h3 className="text-lg font-semibold" style={{ color: "var(--text-secondary)" }}>
+                Quick Challenge
+              </h3>
               <div className="xp-badge ml-auto">+25 XP</div>
             </div>
 
-            <p className="text-sm text-white/60 mb-6">{current.quiz.question}</p>
+            <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
+              {current.quiz.question}
+            </p>
 
             <div className="space-y-2">
               {current.quiz.options.map((option, i) => {
@@ -246,15 +268,28 @@ export default function DataDetectiveLab() {
                     key={option}
                     onClick={() => handleQuizAnswer(i)}
                     disabled={isAnswered}
-                    className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 border ${
-                      isAnswered && isCorrect
-                        ? "bg-green-500/[0.08] border-green-500/30 text-green-400"
+                    className="w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200"
+                    style={{
+                      background: isAnswered && isCorrect
+                        ? "var(--success-bg)"
                         : isSelected && !isCorrect
-                        ? "bg-red-500/[0.08] border-red-500/30 text-red-400"
-                        : "bg-white/[0.02] border-white/[0.06] text-white/60 hover:bg-white/[0.04] hover:border-white/[0.12]"
-                    }`}
+                        ? "var(--error-bg)"
+                        : "var(--card-bg)",
+                      border: `1px solid ${
+                        isAnswered && isCorrect
+                          ? "var(--success-border)"
+                          : isSelected && !isCorrect
+                          ? "var(--error-border)"
+                          : "var(--card-border)"
+                      }`,
+                      color: isAnswered && isCorrect
+                        ? "var(--success-text)"
+                        : isSelected && !isCorrect
+                        ? "var(--error-text)"
+                        : "var(--text-muted)",
+                    }}
                   >
-                    <span className="font-mono text-[10px] text-white/20 mr-3">
+                    <span className="font-mono text-[10px] mr-3" style={{ color: "var(--text-faint)" }}>
                       {String.fromCharCode(65 + i)}
                     </span>
                     {option}
@@ -269,25 +304,34 @@ export default function DataDetectiveLab() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-3 rounded-xl bg-green-500/[0.06] border border-green-500/20"
+                className="mt-4 p-3 rounded-xl"
+                style={{
+                  background: "var(--success-bg)",
+                  border: "1px solid var(--success-border)",
+                }}
               >
-                <p className="text-xs text-green-400/80">
+                <p className="text-xs" style={{ color: "var(--success-text)" }}>
                   🎉 Correct! You earned 25 XP
                 </p>
               </motion.div>
             )}
 
             {/* Progress */}
-            <div className="mt-8 pt-6 border-t border-white/[0.06]">
+            <div className="mt-8 pt-6" style={{ borderTop: "1px solid var(--border-primary)" }}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-white/30">Datasets Analyzed</span>
-                <span className="text-xs font-mono text-white/40">
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>Datasets Analyzed</span>
+                <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
                   {analyzed.filter(Boolean).length}/3
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "var(--progress-bg)" }}>
                 <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-[#00d4ff] to-[#a855f7]"
+                  className="h-full rounded-full"
+                  style={{
+                    background: isDark
+                      ? "linear-gradient(to right, #00d4ff, #a855f7)"
+                      : "linear-gradient(to right, #333, #111)",
+                  }}
                   animate={{ width: `${(analyzed.filter(Boolean).length / 3) * 100}%` }}
                   transition={{ duration: 0.5 }}
                 />

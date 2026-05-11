@@ -1,28 +1,36 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function HeroSection() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   return (
     <section
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
       {/* Ambient orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#00d4ff]/[0.03] blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#a855f7]/[0.04] blur-[100px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#ec4899]/[0.02] blur-[140px]" />
-      </div>
+      {isDark && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#00d4ff]/[0.03] blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#a855f7]/[0.04] blur-[100px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#ec4899]/[0.02] blur-[140px]" />
+        </div>
+      )}
 
       {/* Grid pattern */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-          `,
+          opacity: isDark ? 0.03 : 0.04,
+          backgroundImage: isDark
+            ? `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`
+            : `linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)`,
           backgroundSize: "60px 60px",
         }}
       />
@@ -38,10 +46,17 @@ export default function HeroSection() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] mb-8"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8"
+            style={{
+              background: "var(--card-bg)",
+              border: "1px solid var(--card-border)",
+            }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00d4ff] animate-pulse" />
-            <span className="text-xs text-white/50 tracking-wider uppercase">
+            <span
+              className="w-1.5 h-1.5 rounded-full animate-pulse"
+              style={{ background: "var(--accent)" }}
+            />
+            <span className="text-xs tracking-wider uppercase" style={{ color: "var(--text-muted)" }}>
               Interactive Virtual Lab
             </span>
           </motion.div>
@@ -49,7 +64,7 @@ export default function HeroSection() {
           {/* Title */}
           <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none mb-6">
             <span className="gradient-text">STAT</span>
-            <span className="text-white/90">VERSE</span>
+            <span style={{ color: "var(--text-primary)", opacity: 0.9 }}>VERSE</span>
           </h1>
 
           {/* Subtitle */}
@@ -57,7 +72,8 @@ export default function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-base sm:text-lg text-white/35 font-light tracking-wide max-w-lg mx-auto mb-10"
+            className="text-base sm:text-lg font-light tracking-wide max-w-lg mx-auto mb-10"
+            style={{ color: "var(--text-muted)" }}
           >
             Turning Raw Data into Smart Decisions
           </motion.p>
@@ -72,7 +88,11 @@ export default function HeroSection() {
             {["Statistics", "Probability", "Correlation", "AI & ML", "Data Analysis"].map((tag) => (
               <span
                 key={tag}
-                className="px-3 py-1 text-[10px] uppercase tracking-widest text-white/25 border border-white/[0.06] rounded-full"
+                className="px-3 py-1 text-[10px] uppercase tracking-widest rounded-full"
+                style={{
+                  color: "var(--text-faint)",
+                  border: "1px solid var(--border-primary)",
+                }}
               >
                 {tag}
               </span>
@@ -94,7 +114,10 @@ export default function HeroSection() {
             </a>
             <a
               href="#statistics"
-              className="text-sm text-white/30 hover:text-white/50 transition-colors px-4 py-3"
+              className="text-sm transition-colors px-4 py-3"
+              style={{ color: "var(--text-muted)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
             >
               Explore Labs →
             </a>
@@ -111,9 +134,10 @@ export default function HeroSection() {
           <motion.div
             animate={{ y: [0, 6, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="w-5 h-8 rounded-full border border-white/10 flex items-start justify-center p-1.5"
+            className="w-5 h-8 rounded-full flex items-start justify-center p-1.5"
+            style={{ border: "1px solid var(--border-primary)" }}
           >
-            <div className="w-1 h-2 rounded-full bg-white/20" />
+            <div className="w-1 h-2 rounded-full" style={{ background: "var(--text-faint)" }} />
           </motion.div>
         </motion.div>
       </div>

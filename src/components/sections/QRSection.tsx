@@ -2,8 +2,12 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function QRSection() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   return (
     <section className="relative py-20 md:py-32">
       <div className="section-container text-center">
@@ -36,13 +40,14 @@ export default function QRSection() {
             />
           </motion.div>
 
-          <p className="text-sm text-white/40 mt-4">
+          <p className="text-sm mt-4" style={{ color: "var(--text-muted)" }}>
             Point your camera to open{" "}
             <a
               href="https://statverse.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#00d4ff] hover:underline"
+              style={{ color: "var(--accent)" }}
+              className="hover:underline"
             >
               statverse.vercel.app
             </a>
@@ -52,4 +57,3 @@ export default function QRSection() {
     </section>
   );
 }
-

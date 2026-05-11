@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useXP } from "@/context/XPContext";
 import { ACHIEVEMENTS } from "@/context/XPContext";
+import { useTheme } from "@/context/ThemeContext";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line,
 } from "recharts";
@@ -34,21 +35,13 @@ function calcStats(data: number[]) {
   return { mean: +mean.toFixed(1), median, mode, stdDev: +stdDev.toFixed(1), sorted };
 }
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string } }> }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-[#161625] border border-white/10 rounded-lg px-3 py-2 text-xs">
-      <span className="text-white/50">{payload[0].payload.name}: </span>
-      <span className="text-white font-mono">{payload[0].value}</span>
-    </div>
-  );
-};
-
 export default function DescriptiveStatsLab() {
   const [spread, setSpread] = useState(10);
   const [isMounted, setIsMounted] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const { addXP, completeModule, unlockAchievement } = useXP();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   useEffect(() => {
     setIsMounted(true);
@@ -90,12 +83,36 @@ export default function DescriptiveStatsLab() {
     [hasInteracted, addXP, completeModule, unlockAchievement]
   );
 
+  const DARK_COLORS = ["#00d4ff", "#a855f7", "#ec4899", "#22d3ee"];
+  const LIGHT_COLORS = ["#111111", "#444444", "#777777", "#aaaaaa"];
+
   const statCards = [
-    { label: "Mean", value: stats.mean, color: "#00d4ff", desc: "Average value" },
-    { label: "Median", value: stats.median, color: "#a855f7", desc: "Middle value" },
-    { label: "Mode", value: stats.mode, color: "#ec4899", desc: "Most frequent" },
-    { label: "Std Dev", value: stats.stdDev, color: "#22d3ee", desc: "Spread measure" },
+    { label: "Mean", value: stats.mean, colorIdx: 0, desc: "Average value" },
+    { label: "Median", value: stats.median, colorIdx: 1, desc: "Middle value" },
+    { label: "Mode", value: stats.mode, colorIdx: 2, desc: "Most frequent" },
+    { label: "Std Dev", value: stats.stdDev, colorIdx: 3, desc: "Spread measure" },
   ];
+
+  const axisTickFill = isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.4)";
+  const axisLineStroke = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
+  const lineColor = isDark ? "#a855f7" : "#333333";
+  const meanLineColor = isDark ? "#00d4ff" : "#999999";
+
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; payload: { name: string } }> }) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div
+        className="rounded-lg px-3 py-2 text-xs"
+        style={{
+          background: "var(--tooltip-bg)",
+          border: "1px solid var(--tooltip-border)",
+        }}
+      >
+        <span style={{ color: "var(--text-muted)" }}>{payload[0].payload.name}: </span>
+        <span className="font-mono" style={{ color: "var(--text-primary)" }}>{payload[0].value}</span>
+      </div>
+    );
+  };
 
   return (
     <section id="statistics" className="relative py-20 md:py-32">
@@ -124,8 +141,8 @@ export default function DescriptiveStatsLab() {
           className="glass-card p-6 mb-6"
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-white/50">Data Spread</span>
-            <span className="text-sm font-mono text-[#00d4ff]">{spread}</span>
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>Data Spread</span>
+            <span className="text-sm font-mono" style={{ color: "var(--accent)" }}>{spread}</span>
           </div>
           <input
             type="range"
@@ -135,12 +152,12 @@ export default function DescriptiveStatsLab() {
             onChange={handleSliderChange}
             className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
             style={{
-              background: `linear-gradient(to right, #00d4ff ${(spread / 40) * 100}%, rgba(255,255,255,0.06) ${(spread / 40) * 100}%)`,
+              background: `linear-gradient(to right, var(--accent) ${(spread / 40) * 100}%, var(--progress-bg) ${(spread / 40) * 100}%)`,
             }}
           />
           <div className="flex justify-between mt-2">
-            <span className="text-[10px] text-white/20">Clustered</span>
-            <span className="text-[10px] text-white/20">Spread Out</span>
+            <span className="text-[10px]" style={{ color: "var(--text-faint)" }}>Clustered</span>
+            <span className="text-[10px]" style={{ color: "var(--text-faint)" }}>Spread Out</span>
           </div>
         </motion.div>
 
@@ -155,11 +172,14 @@ export default function DescriptiveStatsLab() {
               transition={{ delay: i * 0.1, duration: 0.5 }}
               className="glass-card p-5 text-center"
             >
-              <p className="text-xs text-white/30 mb-1">{stat.desc}</p>
-              <p className="stat-value !text-2xl md:!text-3xl" style={{ color: stat.color }}>
+              <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{stat.desc}</p>
+              <p
+                className="stat-value !text-2xl md:!text-3xl"
+                style={{ color: isDark ? DARK_COLORS[stat.colorIdx] : LIGHT_COLORS[stat.colorIdx] }}
+              >
                 {stat.value}
               </p>
-              <p className="text-xs font-semibold text-white/50 mt-1">{stat.label}</p>
+              <p className="text-xs font-semibold mt-1" style={{ color: "var(--text-muted)" }}>{stat.label}</p>
             </motion.div>
           ))}
         </div>
@@ -173,17 +193,19 @@ export default function DescriptiveStatsLab() {
             viewport={{ once: true }}
             className="glass-card p-6"
           >
-            <h3 className="text-sm font-semibold text-white/70 mb-4">Distribution Histogram</h3>
+            <h3 className="text-sm font-semibold mb-4" style={{ color: "var(--text-secondary)" }}>
+              Distribution Histogram
+            </h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={histogram} barCategoryGap="15%">
                 <XAxis
                   dataKey="range"
-                  tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }}
-                  axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
+                  tick={{ fill: axisTickFill, fontSize: 10 }}
+                  axisLine={{ stroke: axisLineStroke }}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }}
+                  tick={{ fill: axisTickFill, fontSize: 10 }}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -192,8 +214,8 @@ export default function DescriptiveStatsLab() {
                   {histogram.map((_, i) => (
                     <Cell
                       key={i}
-                      fill={`rgba(0, 212, 255, ${0.15 + i * 0.07})`}
-                      stroke="rgba(0, 212, 255, 0.3)"
+                      fill={isDark ? `rgba(0, 212, 255, ${0.15 + i * 0.07})` : `rgba(0, 0, 0, ${0.08 + i * 0.05})`}
+                      stroke={isDark ? "rgba(0, 212, 255, 0.3)" : "rgba(0, 0, 0, 0.15)"}
                       strokeWidth={1}
                     />
                   ))}
@@ -210,18 +232,20 @@ export default function DescriptiveStatsLab() {
             transition={{ delay: 0.15 }}
             className="glass-card p-6"
           >
-            <h3 className="text-sm font-semibold text-white/70 mb-4">Sorted Marks Distribution</h3>
+            <h3 className="text-sm font-semibold mb-4" style={{ color: "var(--text-secondary)" }}>
+              Sorted Marks Distribution
+            </h3>
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={lineData}>
                 <XAxis
                   dataKey="idx"
-                  tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }}
-                  axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
+                  tick={{ fill: axisTickFill, fontSize: 10 }}
+                  axisLine={{ stroke: axisLineStroke }}
                   tickLine={false}
                 />
                 <YAxis
                   domain={[0, 100]}
-                  tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }}
+                  tick={{ fill: axisTickFill, fontSize: 10 }}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -229,16 +253,16 @@ export default function DescriptiveStatsLab() {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#a855f7"
+                  stroke={lineColor}
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, fill: "#a855f7", stroke: "#a855f7" }}
+                  activeDot={{ r: 4, fill: lineColor, stroke: lineColor }}
                 />
                 {/* Mean line */}
                 <Line
                   type="monotone"
                   dataKey={() => stats.mean}
-                  stroke="#00d4ff"
+                  stroke={meanLineColor}
                   strokeWidth={1}
                   strokeDasharray="4 4"
                   dot={false}
@@ -248,12 +272,12 @@ export default function DescriptiveStatsLab() {
             </ResponsiveContainer>
             <div className="flex items-center gap-4 mt-3">
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-0.5 bg-[#a855f7] rounded" />
-                <span className="text-[10px] text-white/30">Values</span>
+                <div className="w-3 h-0.5 rounded" style={{ background: lineColor }} />
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Values</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-0.5 bg-[#00d4ff] rounded" style={{ borderBottom: "1px dashed" }} />
-                <span className="text-[10px] text-white/30">Mean ({stats.mean})</span>
+                <div className="w-3 h-0.5 rounded" style={{ background: meanLineColor, borderBottom: "1px dashed" }} />
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Mean ({stats.mean})</span>
               </div>
             </div>
           </motion.div>

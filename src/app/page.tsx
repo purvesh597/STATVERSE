@@ -5,6 +5,7 @@ import { XPProvider, useXP } from "@/context/XPContext";
 import Navbar from "@/components/Navbar";
 import XPToast from "@/components/XPToast";
 import Footer from "@/components/Footer";
+import { useTheme } from "@/context/ThemeContext";
 
 // Dynamic imports for code splitting
 const ParticleBackground = dynamic(() => import("@/components/ParticleBackground"), { ssr: false });
@@ -20,6 +21,7 @@ const QRSection = dynamic(() => import("@/components/sections/QRSection"));
 
 function AppContent() {
   const { showXPToast, lastXPGain } = useXP();
+  const { theme } = useTheme();
 
   return (
     <>
@@ -28,7 +30,14 @@ function AppContent() {
       <main className="relative z-10">
         <HeroSection />
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0f] to-transparent opacity-50 pointer-events-none" />
+          <div
+            className="absolute inset-0 opacity-50 pointer-events-none"
+            style={{
+              background: theme === "dark"
+                ? "linear-gradient(to bottom, transparent, #0a0a0f, transparent)"
+                : "linear-gradient(to bottom, transparent, rgba(248,248,248,0.8), transparent)",
+            }}
+          />
           <DataDetectiveLab />
         </div>
         <DescriptiveStatsLab />

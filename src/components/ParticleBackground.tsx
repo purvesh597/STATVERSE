@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Particle {
   x: number;
@@ -14,6 +15,7 @@ interface Particle {
 
 export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,6 +26,8 @@ export default function ParticleBackground() {
 
     let animationId: number;
     let particles: Particle[] = [];
+
+    const isDark = theme === "dark";
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -39,7 +43,7 @@ export default function ParticleBackground() {
         vy: (Math.random() - 0.5) * 0.3,
         size: Math.random() * 2 + 0.5,
         opacity: Math.random() * 0.4 + 0.1,
-        hue: Math.random() > 0.5 ? 190 : 270,
+        hue: isDark ? (Math.random() > 0.5 ? 190 : 270) : 0,
       }));
     };
 
@@ -57,7 +61,12 @@ export default function ParticleBackground() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, 80%, 65%, ${p.opacity})`;
+
+        if (isDark) {
+          ctx.fillStyle = `hsla(${p.hue}, 80%, 65%, ${p.opacity})`;
+        } else {
+          ctx.fillStyle = `rgba(0, 0, 0, ${p.opacity * 0.3})`;
+        }
         ctx.fill();
 
         // Draw connections
@@ -70,7 +79,11 @@ export default function ParticleBackground() {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `hsla(220, 70%, 60%, ${0.06 * (1 - dist / 150)})`;
+            if (isDark) {
+              ctx.strokeStyle = `hsla(220, 70%, 60%, ${0.06 * (1 - dist / 150)})`;
+            } else {
+              ctx.strokeStyle = `rgba(0, 0, 0, ${0.04 * (1 - dist / 150)})`;
+            }
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -84,16 +97,18 @@ export default function ParticleBackground() {
     createParticles();
     drawParticles();
 
-    window.addEventListener("resize", () => {
+    const handleResize = () => {
       resize();
       createParticles();
-    });
+    };
+
+    window.addEventListener("resize", handleResize);
 
     return () => {
       cancelAnimationFrame(animationId);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [theme]);
 
   return (
     <canvas

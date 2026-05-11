@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function QRSection() {
   return (
@@ -19,59 +20,36 @@ export default function QRSection() {
             Open this interactive lab on your device
           </p>
 
-          {/* QR Placeholder */}
+          {/* QR Code */}
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="glass-card neon-glow w-56 h-56 mx-auto flex items-center justify-center mb-8"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="glass-card neon-glow w-64 h-64 md:w-72 md:h-72 mx-auto flex items-center justify-center mb-8 p-4"
           >
-            <div className="relative w-40 h-40">
-              {/* QR pattern placeholder */}
-              <div className="absolute inset-0 grid grid-cols-7 grid-rows-7 gap-0.5">
-                {Array.from({ length: 49 }, (_, i) => {
-                  // Create a QR-like pattern
-                  const row = Math.floor(i / 7);
-                  const col = i % 7;
-                  const isCorner =
-                    (row < 3 && col < 3) ||
-                    (row < 3 && col > 3) ||
-                    (row > 3 && col < 3);
-                  const isInner =
-                    (row === 1 && col === 1) ||
-                    (row === 1 && col === 5) ||
-                    (row === 5 && col === 1);
-                  const isRandom = Math.random() > 0.5;
-
-                  return (
-                    <div
-                      key={i}
-                      className="rounded-sm"
-                      style={{
-                        background: isInner
-                          ? "#00d4ff"
-                          : isCorner
-                          ? "rgba(168, 85, 247, 0.5)"
-                          : isRandom
-                          ? "rgba(255,255,255,0.15)"
-                          : "transparent",
-                      }}
-                    />
-                  );
-                })}
-              </div>
-              {/* Center icon */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00d4ff] to-[#a855f7] flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">S</span>
-                </div>
-              </div>
-            </div>
+            <Image
+              src="/statverse-qr.png"
+              alt="Scan to visit statverse.vercel.app"
+              width={280}
+              height={280}
+              className="rounded-lg"
+              priority
+            />
           </motion.div>
 
-          <p className="text-xs text-white/20">
-            Replace this placeholder with your actual deployment QR code
+          <p className="text-sm text-white/40 mt-4">
+            Point your camera to open{" "}
+            <a
+              href="https://statverse.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#00d4ff] hover:underline"
+            >
+              statverse.vercel.app
+            </a>
           </p>
         </motion.div>
       </div>
     </section>
   );
 }
+
